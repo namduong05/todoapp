@@ -7,6 +7,9 @@ import DateTimeFilter from "@/components/DateTimeFilter";
 import Footer from "@/components/Footer";
 
 const HomePage = () => {
+  const activeTasksCount: number = 0;
+  const completedTasksCount: number = 0;
+  let filter: string = "all";
   return (
     <div className="min-h-screen w-full bg-white relative">
       {/* Dual Gradient Overlay Swapped Background */}
@@ -29,7 +32,11 @@ const HomePage = () => {
           {/* Tạo nhiệm vụ */}
           <AddTask />
           {/* Thông kê và bộ lọc */}
-          <StatsAndFilters />
+          <StatsAndFilters
+            activeTasksCount={activeTasksCount}
+            completedTasksCount={completedTasksCount}
+            filter={filter}
+          />
           {/* Danh sách nhiệm vụ */}
           <TaskList />
           {/* Phân trang và lọc theo ngày */}
@@ -38,7 +45,10 @@ const HomePage = () => {
             <DateTimeFilter />
           </div>
           {/* Chân trang */}
-          <Footer />
+          <Footer
+            activeTasksCount={activeTasksCount}
+            completedTasksCount={completedTasksCount}
+          />
         </div>
       </div>
     </div>
