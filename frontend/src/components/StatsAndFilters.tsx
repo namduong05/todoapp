@@ -6,11 +6,13 @@ import { Filter } from "lucide-react";
 const StatsAndFilters = ({
   completedTasksCount = 0,
   activeTasksCount = 0,
-  filter = "all",
+  filter,
+  setFilter,
 }: {
   completedTasksCount: number;
   activeTasksCount: number;
   filter: string;
+  setFilter: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   return (
     <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
@@ -37,6 +39,7 @@ const StatsAndFilters = ({
             variant={filter === type ? "gradient" : "ghost"}
             size="sm"
             className="capitalize"
+            onClick={() => setFilter(type)}
           >
             <Filter className="size-4" />
             {type === "all"

@@ -5,11 +5,57 @@ import TaskList from "@/components/TaskList";
 import Pagination from "@/components/Pagination";
 import DateTimeFilter from "@/components/DateTimeFilter";
 import Footer from "@/components/Footer";
+import { useEffect, useState } from "react";
+import type { Task } from "@/type";
+import { toast } from "sonner";
+import api from "@/lib/axios";
+
+type Test = {
+  tasks: Task[];
+  activeCount: number;
+  completeCount: number;
+};
 
 const HomePage = () => {
-  const activeTasksCount: number = 0;
-  const completedTasksCount: number = 0;
-  let filter: string = "all";
+  const [taskBuffer, setTaskBuffer] = useState<Task[] | null>(null);
+  const [activeTasksCount, setActiveTasksCount] = useState<number>(0);
+  const [completedTasksCount, setCompletedTasksCount] = useState<number>(0);
+  const [filter, setFilter] = useState<string>("all");
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const fetchTasks = async () => {
+    try {
+      const res = await api.get<Test>("/tasks");
+      setTaskBuffer(res.data.tasks);
+      setActiveTasksCount(res.data.activeCount);
+      setCompletedTasksCount(res.data.completeCount);
+    } catch (error) {
+      console.error("Lỗi khi lấy dữ liệu nhiệm vụ", error);
+      toast.error("Lỗi khi lấy dữ liệu nhiệm vụ");
+    }
+  };
+
+  let filteredTasks = null;
+  if (taskBuffer) {
+    filteredTasks = taskBuffer.filter((task) => {
+      switch (filter) {
+        case "active":
+          return task.status === "active";
+        case "completed":
+          return task.status === "complete";
+        default:
+          return true;
+      }
+    });
+  }
+
+  const handleTaskChanged = () => {
+    fetchTasks();
+  };
+
   return (
     <div className="min-h-screen w-full bg-white relative">
       {/* Dual Gradient Overlay Swapped Background */}
@@ -30,15 +76,20 @@ const HomePage = () => {
           {/* Đầu trang */}
           <Header />
           {/* Tạo nhiệm vụ */}
-          <AddTask />
+          <AddTask handleTaskAdded={handleTaskChanged} />
           {/* Thông kê và bộ lọc */}
           <StatsAndFilters
             activeTasksCount={activeTasksCount}
             completedTasksCount={completedTasksCount}
             filter={filter}
+            setFilter={setFilter}
           />
           {/* Danh sách nhiệm vụ */}
-          <TaskList />
+          <TaskList
+            filteredTasks={filteredTasks}
+            filter={filter}
+            handleTaskChanged={handleTaskChanged}
+          />
           {/* Phân trang và lọc theo ngày */}
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
             <Pagination />
