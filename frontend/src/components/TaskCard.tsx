@@ -12,6 +12,7 @@ import {
 import { Input } from "./ui/input";
 import api from "@/lib/axios";
 import { toast } from "sonner";
+import { useState } from "react";
 
 const TaskCard = ({
   task,
@@ -22,7 +23,10 @@ const TaskCard = ({
   index: number;
   handleTaskChanged: () => void;
 }) => {
-  let isEditting = false;
+  const [isEditting, setIsEditting] = useState<boolean>(false);
+  const [updateTaskTitle, setUpdateTaskTitle] = useState<string>(
+    task.title || "",
+  );
 
   const deleteTask = async (taskId: string) => {
     try {
@@ -32,6 +36,52 @@ const TaskCard = ({
     } catch (error) {
       console.error("Loi khi xoa nhiem vu.");
       toast.error("Loi khi xoa nhiem vu");
+    }
+  };
+
+  const updateTask = async () => {
+    try {
+      setIsEditting(false);
+      await api.put(`/tasks/${task._id}`, {
+        title: updateTaskTitle,
+      });
+      console.log("Cập nhật task thành công!");
+      toast.success("Cập nhật task thành công!");
+      handleTaskChanged();
+    } catch (error) {
+      console.log("Có lỗi khi cập nhật task!", error);
+      toast.success("Có lỗi khi cập nhật task!");
+    }
+  };
+
+  const toggleTaskComplete = async () => {
+    try {
+      if (task.status === "active") {
+        await api.put(`/tasks/${task._id}`, {
+          status: "complete",
+          completedAt: new Date().toISOString(),
+        });
+
+        toast.success(`Nhiệm vụ ${task.title} đã hoàn thành!`);
+      } else {
+        await api.put(`/tasks/${task._id}`, {
+          status: "active",
+          completedAt: null,
+        });
+
+        toast.success(`Nhiệm vụ ${task.title} chuyển thành đang làm!`);
+      }
+
+      handleTaskChanged();
+    } catch (error) {
+      console.log("Có lỗi khi cập nhật trạng thái task!", error);
+      toast.success("Có lỗi khi cập nhật trạng thái task!");
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      updateTask();
     }
   };
 
@@ -54,6 +104,7 @@ const TaskCard = ({
               ? "text-success hover:text-success/80"
               : "text-muted-foreground hover:text-primary",
           )}
+          onClick={toggleTaskComplete}
         >
           {task.status === "complete" ? (
             <CheckCircle2 className="size-5" />
@@ -68,6 +119,13 @@ const TaskCard = ({
               placeholder="Cần làm gì?"
               className="flex-1 h-12 text-base border-border/50 focus:border-primary/50 focus:ring-primary/50"
               type="text"
+              value={updateTaskTitle}
+              onChange={(e) => setUpdateTaskTitle(e.target.value)}
+              onKeyPress={handleKeyPress}
+              onBlur={() => {
+                setIsEditting(false);
+                setUpdateTaskTitle(task.title || "");
+              }}
             />
           ) : (
             <p
@@ -106,6 +164,10 @@ const TaskCard = ({
             variant="ghost"
             size="icon"
             className="shrink-0 transition-colors size-8 text-muted-foreground hover:text-info"
+            onClick={() => {
+              setIsEditting(true);
+              setUpdateTaskTitle(task.title || "");
+            }}
           >
             <SquarePen className="size-4" />
           </Button>
