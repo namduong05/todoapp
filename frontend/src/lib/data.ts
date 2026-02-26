@@ -31,3 +31,5 @@ export const options: DateFilter[] = [
     label: "Tất cả",
   },
 ];
+
+export const visibleTaskLimit = 4;
