@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import type { Task } from "@/type";
 import { toast } from "sonner";
 import api from "@/lib/axios";
+import { options, type DateFilter } from "@/lib/data";
 
 type Test = {
   tasks: Task[];
@@ -21,14 +22,15 @@ const HomePage = () => {
   const [activeTasksCount, setActiveTasksCount] = useState<number>(0);
   const [completedTasksCount, setCompletedTasksCount] = useState<number>(0);
   const [filter, setFilter] = useState<string>("all");
+  const [dateQuery, setDateQuery] = useState<DateFilter>(options[0]);
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [dateQuery]);
 
   const fetchTasks = async () => {
     try {
-      const res = await api.get<Test>("/tasks");
+      const res = await api.get<Test>(`/tasks?filter=${dateQuery.value}`);
       setTaskBuffer(res.data.tasks);
       setActiveTasksCount(res.data.activeCount);
       setCompletedTasksCount(res.data.completeCount);
@@ -93,7 +95,7 @@ const HomePage = () => {
           {/* Phân trang và lọc theo ngày */}
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
             <Pagination />
-            <DateTimeFilter />
+            <DateTimeFilter dateQuery={dateQuery} setDateQuery={setDateQuery} />
           </div>
           {/* Chân trang */}
           <Footer

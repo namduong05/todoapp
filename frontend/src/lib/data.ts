@@ -7,3 +7,27 @@ export const filters = {
   active: string;
   completed: string;
 };
+
+export type DateFilter = {
+  value: string;
+  label: string;
+};
+
+export const options: DateFilter[] = [
+  {
+    value: "today",
+    label: "Hôm nay",
+  },
+  {
+    value: "week",
+    label: "Tuần này",
+  },
+  {
+    value: "month",
+    label: "Tháng này",
+  },
+  {
+    value: "all",
+    label: "Tất cả",
+  },
+];
